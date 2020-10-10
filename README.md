@@ -1,2 +1,2 @@
 # PM566-project
-this is the project for pm566. For the midterm part
+this is the project for pm566. For the midterm part I primarly answer my first question. It has been difficult to adjusting the overlaping label on x-aixs and the label for pie chart. Hopwfully those problem would be fixed by the final because for now I tried lots of ways yet still can not fix it. The report is incomplete and not good enough. I'll keep working on it and make it better by the final due.
