@@ -1,0 +1,118 @@
+---
+title: "project"
+author: "Shan"
+date: "9/4/2020"
+output: html_document
+---
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(tidyverse) 
+library(psych)
+library(leaflet)
+library(ggplot2)
+```
+
+
+-Introduction:
+question: Among population with known race category, What's the proportion of each race affected by the covid-19 across the U.S? which race was being affected most? (at each state, which race have the highest number positive cases and death cases? )
+
+data background: the primary data source is the COVID Racial Data Tracker.They collect, cross-check, and publish COVID-19 data from 56 US states and territories in three main areas: testing, patient outcomes, and, via The COVID Racial Data Tracker, racial and ethnic demographic information. Data is being updated twice per week.
+
+-Methods:
+ Given the data being provied, we consider removing the NA's. We sum up the case number of each race by the latest updated numbers, then summarized the proportion of  races and ethnicity for both cases and deaths number across the States. The software  would be R. 
+#look at the data 
+```{r}
+covid_race = data.table::fread("/Users/haoyueshan/Desktop/pm566/PM566-project/Race-Data.csv")
+head(covid_race)
+```
+#choosing the latest data 
+```{r}
+covid_race = covid_race[1:56,1:28]
+tail(covid_race)
+```
+
+#change characteristic varibles into numeric varibles
+```{r}
+covid_race = covid_race %>% 
+  mutate(Cases_Total = as.numeric(Cases_Total), Cases_White = as.numeric(Cases_White), Cases_Ethnicity_Unknown = as.numeric(Cases_Ethnicity_Unknown))
+covid_race
+sub = covid_race[,4:28]
+sub
+```
+#sum up the total values without NA's for ecvery race and make an overall barplot
+
+```{r}
+temp = apply(sub,2,sum, na.rm = TRUE)
+temp = as.data.frame(temp)
+temp
+names=rownames(temp)
+names
+```
+
+#make subgroup of cases and deaths 
+```{r}
+cases_name = names[0:8]
+cases_number= temp[0:8,]
+cases = data.frame(cases_name,cases_number)
+deaths_name = names[14:21]
+deaths_number = temp[14:21,]
+deaths = data.frame(deaths_name,deaths_number)
+cases
+deaths
+```
+-Preliminary Results
+We got the latest number of case and death for each race group in the table above.
+
+#count the percentage for each group 
+```{r}
+pct_case = cases$cases_number/sum(cases$cases_number)
+pct_cases = data.frame(cases_name,pct_case)
+pct_cases
+
+
+pct_death = deaths$deaths_number/sum(deaths$deaths_number)
+pct_deaths = data.frame(deaths_name,pct_death)
+pct_deaths
+```
+
+#making a pie chart for race compnent 
+```{r}
+slices = pct_case
+lbls = cases_name
+pct <- round(slices/sum(slices)*100)
+lbls <- paste(lbls, pct) # add percents to labels
+lbls <- paste(lbls,"%",sep="") # ad % to labels
+pie(slices,labels = lbls, col=rainbow(length(lbls)),
+   main="Pie Chart of Cases")
+```
+```{r}
+slices = pct_death
+lbls = deaths_name
+pct <- round(slices/sum(slices)*100)
+lbls <- paste(lbls, pct) # add percents to labels
+lbls <- paste(lbls,"%",sep="") # ad % to labels
+pie(slices,labels = lbls, col=rainbow(length(lbls)),
+   main="Pie Chart of Deaths")
+```
+
+#make bar plot for each table（having troble adjusting the x-axis, fix it later) 
+
+```{r}
+  ggplot(data = pct_cases,aes(x=cases_name, y=pct_case, fill = pct_case))+
+  geom_col()
+```
+
+```{r}
+ ggplot(data = pct_deaths,aes( x=deaths_name, y=pct_death, fill = pct_death))+
+  geom_col()
+```
+
+4.conclusion
+Overall, among positive cases with known races,  white, LatinX, and Black are the three most affected races;
+these three races also have the highest death number among known races' death. 
+
+
+
+
